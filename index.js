@@ -18,9 +18,12 @@
  * Use of Google is not encouraged
  * 
  */
-const grid = [];
+let grid = [];
 const GRID_LENGTH = 3;
 let turn = 'X';
+let counter = 1;
+let newValue = 0;
+let moves = 0;
 
 function initializeGrid() {
     for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
@@ -72,17 +75,75 @@ function renderMainGrid() {
 }
 
 function onBoxClick() {
+    moves += 1;
     var rowIdx = this.getAttribute("rowIdx");
     var colIdx = this.getAttribute("colIdx");
-    let newValue = 1;
+    newValue = counter == 1 ? 1 : 2;
     grid[colIdx][rowIdx] = newValue;
+
+    counter = (counter+1)%2;
+    let player = newValue == 1 ? "Player" : "Computer";
+    if (gameOver(this)){
+        alert("Winner: "+player);
+        grid = [];
+        counter = 1;
+        moves = 0;
+        initializeGrid();
+    } else if(moves == 9){
+        alert("Draw");
+        grid = [];
+        counter = 1;
+        moves = 0;
+        initializeGrid();
+    }
+
     renderMainGrid();
     addClickHandlers();
+}
+
+function gameOver(clicked) {
+    return(row(grid) || column(grid) || diagonal(grid));
+}
+
+function row(grid) {
+    for (i=0;i<3;i++){
+        if (grid[i][0] == grid[i][1] &&
+                   grid[i][1] == grid[i][2] &&
+                   grid[i][0] != 0)
+                   return (true);
+
+    }
+    return false;
+}
+
+function column(grid) {
+    for (i=0;i<3;i++){
+        if (grid[0][i] == grid[1][i] &&
+                   grid[1][i] == grid[2][i] &&
+                   grid[0][i] != 0)
+                   return (true);
+
+    }
+    return false;
+}
+
+function diagonal(grid) {
+        if (grid[0][0] == grid[1][1] &&
+                   grid[1][1] == grid[2][2] &&
+                   grid[0][0] != 0)
+                   return (true);
+        if (grid[0][2] == grid[1][1] &&
+                grid[1][1] == grid[2][0] &&
+                 grid[0][2] != ' ')
+                return(true);
+    return false;
 }
 
 function addClickHandlers() {
     var boxes = document.getElementsByClassName("box");
     for (var idx = 0; idx < boxes.length; idx++) {
+        if (boxes[idx].childNodes.length == 1)
+            continue;
         boxes[idx].addEventListener('click', onBoxClick, false);
     }
 }
