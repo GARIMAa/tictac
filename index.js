@@ -22,8 +22,35 @@ let grid = [];
 const GRID_LENGTH = 3;
 let turn = 'X';
 let counter = 1;
-let newValue = 0;
 let moves = 0;
+
+
+var gameInitialControl = function setGameInitialState() {
+    var newValue = 2;
+    var gameInfo  = document.getElementById("gameInfo");
+    var text = "Player One Turn";
+    var swapText = "Player Two Turn";
+
+    var gameInitialControl = {};
+
+    function getNextValue() {
+        newValue = newValue == 1 ? 2 : 1;
+        if (gameInfo.innerText ==  text)
+            gameInfo.innerText = swapText;
+        else
+            gameInfo.innerText = text;
+        return newValue;
+    }
+
+    function reset() {
+        newValue = 2;
+        gameInfo.innerText = "Player One Turn";
+
+    }
+    gameInitialControl.getNextValue = getNextValue;
+    gameInitialControl.reset = reset;
+    return gameInitialControl;
+}();
 
 function initializeGrid() {
     for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
@@ -37,7 +64,7 @@ function initializeGrid() {
 
 function getRowBoxes(colIdx) {
     let rowDivs = '';
-    
+
     for(let rowIdx=0; rowIdx < GRID_LENGTH ; rowIdx++ ) {
         let additionalClass = 'darkBackground';
         let content = '';
@@ -50,7 +77,7 @@ function getRowBoxes(colIdx) {
             content = '<span class="cross">X</span>';
         }
         else if (gridValue === 2) {
-            content = '<span class="cross">O</span>';
+            content = '<span class="zero">O</span>';
         }
         rowDivs = rowDivs + '<div colIdx="'+ colIdx +'" rowIdx="' + rowIdx + '" class="box ' +
             additionalClass + '">' + content + '</div>';
@@ -74,31 +101,43 @@ function renderMainGrid() {
     parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
 }
 
+function isSet(val) {
+    return val == 1 || val == 2;
+}
+
+function resetGame() {
+    grid = [];
+        counter = 1;
+        moves = 0;
+        gameInitialControl.reset();
+        initializeGrid();
+        renderMainGrid();
+        addClickHandlers();
+}
+
 function onBoxClick() {
-    moves += 1;
     var rowIdx = this.getAttribute("rowIdx");
     var colIdx = this.getAttribute("colIdx");
-    newValue = counter == 1 ? 1 : 2;
+    if (isSet(grid[colIdx][rowIdx]))
+        return;
+
+    moves += 1;
+
+    var newValue = gameInitialControl.getNextValue();
     grid[colIdx][rowIdx] = newValue;
 
     counter = (counter+1)%2;
+    renderMainGrid();
+    addClickHandlers();
     let player = newValue == 1 ? "Player" : "Computer";
     if (gameOver(this)){
         alert("Winner: "+player);
-        grid = [];
-        counter = 1;
-        moves = 0;
-        initializeGrid();
+        resetGame();
     } else if(moves == 9){
         alert("Draw");
-        grid = [];
-        counter = 1;
-        moves = 0;
-        initializeGrid();
+       resetGame();
     }
 
-    renderMainGrid();
-    addClickHandlers();
 }
 
 function gameOver(clicked) {
@@ -142,8 +181,6 @@ function diagonal(grid) {
 function addClickHandlers() {
     var boxes = document.getElementsByClassName("box");
     for (var idx = 0; idx < boxes.length; idx++) {
-        if (boxes[idx].childNodes.length == 1)
-            continue;
         boxes[idx].addEventListener('click', onBoxClick, false);
     }
 }

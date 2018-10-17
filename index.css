@@ -50,3 +50,19 @@
     border-radius: 5px;
     line-height: 100px;
 }
+
+.zero{
+    color: #a25;
+    font-size: 2.5em;
+    border-radius: 5px;
+    line-height: 100px;
+}
+
+.gameInfo {
+    margin-left : 40;
+}
+
+.reset {
+    margin-left : 50;
+    margin-top: 10;
+}
